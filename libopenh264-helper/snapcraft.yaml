@@ -49,4 +49,7 @@ parts:
       - curl
     prime:
       - '-bin/bz*'
+<<<<<<< HEAD
 
+=======
+>>>>>>> add gnome-platform snap support

@@ -21,4 +21,3 @@ else
 fi
 
 export SNAP_LAUNCHER_ARCH_TRIPLET=$ARCH
-
