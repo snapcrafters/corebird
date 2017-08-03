@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="corebird.png" alt="Corebird">
+  <img src="assets/corebird.png" alt="Corebird">
   <br />
   Corebird
 </h1>
@@ -18,15 +18,13 @@ distributions.</p>
 
 ([Don't have snapd installed?](https://snapcraft.io/docs/core/install))
 
-<!-- Uncomment and modify this when you have a screenshot
-![my-snap-name](screenshot.png?raw=true "my-snap-name")
--->
+![Corebird](assets/screenshot.png?raw=true "Corebird")
 
 <p align="center">Published for <img src="http://anything.codes/slack-emoji-for-techies/emoji/tux.png" align="top" width="24" /> with :gift_heart: by Snapcrafters</p>
 
 ## Remaining tasks
 
-Snapcrafters ([join us](https://forum.snapcraft.io/t/join-snapcrafters/1325)) 
+Snapcrafters ([join us](https://forum.snapcraft.io/t/join-snapcrafters/1325))
 are working to land snap install documentation and
 the [snapcraft.yaml](https://github.com/snapcrafters/fork-and-rename-me/blob/master/snap/snapcraft.yaml)
 upstream so Corebird can authoritatively publish future releases.
@@ -36,7 +34,7 @@ upstream so Corebird can authoritatively publish future releases.
   - [x] Update logos and references to `[Project]` and `[my-snap-name]`
   - [x] Create a snap that runs in `devmode`
   - [x] Register the snap in the store, **using the preferred upstream name**
-  - [ ] Add a screenshot to this `README.md`
+  - [x] Add a screenshot to this `README.md`
   - [x] Publish the `devmode` snap in the Snap store edge channel
   - [x] Add install instructions to this `README.md`
   - [x] Update snap store metadata, icons and screenshots
@@ -51,7 +49,7 @@ upstream so Corebird can authoritatively publish future releases.
   - [ ] Post an announcement in the [Snapcraft Forum](https://forum.snapcraft.io) - [link]()
   - [ ] Submit a pull request or patch upstream that adds snap install documentation - [link]()
   - [ ] Submit a pull request or patch upstream that adds the `snapcraft.yaml` and any required assets/launchers - [link]()
-  - [ ] Add upstream contact information to the `README.md`  
+  - [ ] Add upstream contact information to the `README.md`
   - If upstream accept the PR:
     - [ ] Request upstream create a Snap store account
     - [ ] Contact the Snap Advocacy team to request the snap be transferred to upstream
