@@ -9,17 +9,30 @@ description: |
   Twitter accounts.
 icon: corebird.svg
 confinement: strict
+
 slots:
   dbus-corebird:
     interface: dbus
     bus: session
     name: org.baedert.corebird
+
+plugs:
+  gnome-3-24-platform:
+    interface: content
+    target: gnome-platform
+    default-provider: gnome-3-24:gnome-3-24-platform
+
 apps:
   corebird:
-    command: desktop-launch $SNAP/usr/bin/corebird
-    #desktop: meta/gui/corebird.desktop
-    #desktop: usr/share/applications/org.baedert.corebird.desktop
+    command: |
+      libopenh264-launch desktop-launch
+      env GST_PLUGIN_PATH=$SNAP/usr/lib/gstreamer-1.0
+          GST_PLUGIN_SYSTEM_PATH=$SNAP/usr/lib/gstreamer-1.0
+          GST_PLUGIN_SCANNER=$SNAP/usr/libexec/gstreamer-1.0/gst-plugin-scanner
+      $SNAP/usr/bin/corebird
+
     plugs:
+      - gnome-3-24-platform
       - gsettings
       - home
       - network
@@ -28,20 +41,15 @@ apps:
       - pulseaudio
       - unity7
       - x11
-parts:
-  desktop-helper:
-    plugin: make
-    source: desktop-helpers
-    source-subdir: gtk
-    make-parameters: ["FLAVOR=gtk3"]
-    stage-packages:
-      - libxkbcommon0  # XKB_CONFIG_ROOT
-      - ttf-ubuntu-font-family
-      - dmz-cursor-theme
-      - shared-mime-info
-      - locales-all
 
-  openh264:
+parts:
+  libopenh264-helper:
+    source: libopenh264-helper
+    source-subdir: libopenh264
+    plugin: make
+    after: [libopenh264-library]
+
+  libopenh264-library:
     plugin: make
     source: https://github.com/cisco/openh264/archive/v1.7.0.tar.gz
     build-packages:
@@ -51,7 +59,6 @@ parts:
       - curl
     prime:
       - '-bin/bz*'
-      - '-usr/local'
 
   corebird:
     plugin: jhbuild
@@ -61,9 +68,9 @@ parts:
       - corebird
     cflags: '-Os'
     build-packages:
-      - bzip2
       - desktop-file-utils
       - doxygen
+      - intltool
       - libcairo2-dev
       - libcurl4-openssl-dev
       - libdbus-1-dev
@@ -78,7 +85,6 @@ parts:
       - libgudev-1.0-dev
       - libmount-dev
       - liborc-0.4-dev
-      - libpng12-dev
       - libproxy-dev
       - libpulse-dev
       - libsqlite3-dev
@@ -89,10 +95,13 @@ parts:
       - libxcb-xkb-dev
       - libxft-dev
       - libxi-dev
+      - libxml2-dev
       - libxml2-utils
       - libxslt1-dev
       - libxtst-dev
+      - libxv-dev
       - nasm
+      - pkg-config
       - ragel
       - tar
       - wget
@@ -102,97 +111,48 @@ parts:
       - yasm
       - valac
     stage-packages:
-      - bzip2
-      - curl
-      - libfontconfig1
-    after: [desktop-helper, openh264]
+      - libcurl3
+      - libgnutls30
+      - libpulse0
+    after: [desktop-gnome-platform, libopenh264-helper]
     prime:
-      - '-usr/share/aclocal'
-      - '-bash-completion'
-      - '-etc/gss/'
-      - '-etc/ldap/'
-      - '-defaults'
-      - '-devhelp'
-      - '-usr/_jhbuild'
-      - '-usr/bin/*gettext*'
-      - '-usr/bin/autopoint'
-      - '-usr/bin/broadwayd'
-      - '-usr/bin/croco-*'
-      - '-usr/bin/csslint*'
-      - '-usr/bin/envsubst'
-      - '-usr/bin/gapplication'
-      - '-usr/bin/gdbus*'
-      - '-usr/bin/gdk-pixbuf-csource'
-      - '-usr/bin/gdk-pixbuf-pixdata'
-      - '-usr/bin/gdk-pixbuf-thumbnailer'
-      - '-usr/bin/g-ir-*'
-      - '-usr/bin/glib-*'
-      - '-usr/bin/gobject-*'
-      - '-usr/bin/gresource'
-      - '-usr/bin/gsettings'
-      - '-usr/bin/gst*'
-      - '-usr/bin/gtester*'
-      - '-usr/bin/gtk*'
-      - '-usr/bin/hb-*'
-      - '-usr/bin/json-glib-*'
-      - '-usr/bin/lcf'
-      - '-usr/bin/meson*'
-      - '-usr/bin/msg*'
-      - '-usr/bin/pango*'
-      - '-usr/bin/recode*'
-      - '-usr/bin/rsvg*'
-      - '-usr/bin/ucf*'
-      - '-usr/bin/vala*'
-      - '-usr/bin/vapi*'
-      - '-usr/bin/yelp*'
-      - '-usr/etc'
-      - '-usr/include'
-      - '-usr/lib/*sasl*'
-      - '-usr/lib/cmake'
-      - '-usr/lib/gcc'
-      - '-usr/lib/gtk-2.0'
-      - '-usr/lib/pkgconfig'
-      - '-usr/lib/python*'
-      - '-usr/lib/systemd'
-      - '-usr/lib/vala*'
-      - '-usr/libexec/at-spi*'
-      - '-usr/libexec/glib-pacrunner'
-      - '-usr/libexec/gstreamer-1.0/gst-ptp-helper'
-      - '-usr/libexec/installed-tests'
-      - '-usr/share/applications/gtk-*'
-      - '-usr/share/bash-completion'
-      - '-usr/share/devhelp'
-      - '-usr/share/doc*'
-      - '-usr/share/gdb'
-      - '-usr/share/gettext*'
-      - '-usr/share/gir-1.0'
-      - '-usr/share/glib-2.0/codegen'
-      - '-usr/share/glib-2.0/gdb'
-      - '-usr/share/glib-2.0/gettext'
-      - '-usr/share/glib-2.0/valgrind'
-      - '-usr/share/gobject-introspection-1.0'
-      - '-usr/share/gst-plugins-base'
-      - '-usr/share/gstreamer-1.0'
-      - '-usr/share/gtk-3.0'
-      - '-usr/share/gtk-doc'
-      - '-usr/share/help'
-      - '-usr/share/info'
-      - '-usr/share/installed-tests'
-      - '-usr/share/lintian'
-      - '-usr/share/locale/**/gdk-pixbuf*'
-      - '-usr/share/locale/**/gettext*'
-      - '-usr/share/locale/**/glib*'
-      - '-usr/share/locale/**/gsettings-desktop-schemas*'
-      - '-usr/share/locale/**/gst-plugins-*'
-      - '-usr/share/locale/**/gstreamer-1.0*'
-      - '-usr/share/locale/**/gtk30*'
-      - '-usr/share/locale/**/iso_*'
-      - '-usr/share/locale/**/json-glib*'
-      - '-usr/share/locale/**/libsoup*'
-      - '-usr/share/man'
-      - '-usr/share/pkgconfig'
-      - '-usr/share/sgml'
-      - '-usr/share/thumbnailers'
-      - '-usr/share/vala*'
-      - '-usr/share/yelp*'
-      - '-usr/share/zsh'
+      - bin/*-launch
+      - usr/bin/corebird
+      - usr/lib/gstreamer-1.0
+      - usr/lib/libgspell*
+      - usr/lib/libgst*
+      #- usr/lib/libjson-glib* # provided by platform
+      #- usr/lib/librest* # provided by platform
+      #- usr/lib/libsoup* # provided by platform
+      - usr/lib/*-linux-gnu/libasn*
+      - usr/lib/*-linux-gnu/libasyncns*
+      - usr/lib/*-linux-gnu/libboost*
+      - usr/lib/*-linux-gnu/libcapnp*
+      - usr/lib/*-linux-gnu/libcurl*
+      - usr/lib/*-linux-gnu/libdb*
+      - usr/lib/*-linux-gnu/libfaad*
+      - usr/lib/*-linux-gnu/libFLAC*
+      - usr/lib/*-linux-gnu/libheimbase*
+      - usr/lib/*-linux-gnu/libheimntlm*
+      - usr/lib/*-linux-gnu/libhx509*
+      - usr/lib/*-linux-gnu/libkj*
+      - usr/lib/*-linux-gnu/libber*
+      - usr/lib/*-linux-gnu/libldap*
+      - usr/lib/*-linux-gnu/libogg*
+      - usr/lib/*-linux-gnu/libprotobuf-lite*
+      - usr/lib/*-linux-gnu/libpulse*
+      - usr/lib/*-linux-gnu/libroken*
+      - usr/lib/*-linux-gnu/librtmp*
+      - usr/lib/*-linux-gnu/libsasl*
+      - usr/lib/*-linux-gnu/libsndfile*
+      - usr/lib/*-linux-gnu/libunwind*
+      - usr/lib/*-linux-gnu/libv4l*
+      - usr/lib/*-linux-gnu/libwind*
+      - usr/libexec/gstreamer-1.0/gst-plugin-scanner
+      - usr/local/lib/libopenh264*
+      - usr/share/appdata
+      - usr/share/dbus-1/services/org.baedert.corebird.service
+      - usr/share/glib-2.0/schemas/org.baedert.corebird.gschema.xml
+      - usr/share/icons/hicolor/**/corebird.png
+      - usr/share/locale/**/corebird.mo
+
