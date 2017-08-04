@@ -7,7 +7,7 @@ description: |
   features inline image and video preview, creation of lists and favorites,
   filtering of tweets and full text search. Corebird is able to manage multiple
   Twitter accounts.
-icon: corebird.svg
+icon: assets/corebird.png
 confinement: strict
 
 slots:
