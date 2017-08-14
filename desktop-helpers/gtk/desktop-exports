@@ -67,39 +67,6 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RUNTIME/usr/lib/$ARCH/libunity
 # Pulseaudio export
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RUNTIME/usr/lib/$ARCH/pulseaudio:$RUNTIME/usr/lib/pulseaudio
 
-# OpenH264 library
-H264DIR=$SNAP_USER_DATA/openh264
-
-OPENH264VERSION=1.7.0
-OPENH264ARMURL="https://c7ab4fbd1155b1257820-fefb1450afc680271ea365edabf976ea.ssl.cf1.rackcdn.com/libopenh264-1.7.0-android19.so.bz2"
-OPENH264X64URL="https://c7ab4fbd1155b1257820-fefb1450afc680271ea365edabf976ea.ssl.cf1.rackcdn.com/libopenh264-1.7.0-linux64.4.so.bz2"
-
-if [ ! -f $H264DIR/version -o "$(cat $H264DIR/version)" != "$OPENH264VERSION" -o ! -f $H264DIR/libopenh264.so ]; then
-  rm -rf $H264DIR
-  mkdir -p $H264DIR
-
-	OPENH264URL=""
-  if [ "$SNAP_ARCH" = "armhf" ]; then
-    OPENH264URL="$OPENH264ARMURL"
-  elif [ "$SNAP_ARCH" = "amd64" ]; then
-    OPENH264URL="$OPENH264X64URL"
-  fi
-
-	if [ -n "$OPENH264URL" ]; then
-		curl -o $H264DIR/libopenh264.so.bz2 "$OPENH264URL"
-	  bunzip2 $H264DIR/libopenh264.so.bz2
-		echo "$OPENH264VERSION" > $H264DIR/version
-	fi
-fi
-
-if [ ! -e $H264DIR/libopenh264.so.3 ]; then
-  ln -s libopenh264.so $H264DIR/libopenh264.so.3
-fi
-if [ ! -e $H264DIR/libopenh264.so.4 ]; then
-  ln -s libopenh264.so $H264DIR/libopenh264.so.4
-fi
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$H264DIR
-
 # Tell GStreamer where to find its plugins
 if [ -d $SNAP/usr/lib/$ARCH/gstreamer-1.0 ]; then
   export GST_PLUGIN_PATH=$SNAP/usr/lib/$ARCH/gstreamer-1.0
