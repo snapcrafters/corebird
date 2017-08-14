@@ -30,7 +30,6 @@ apps:
           GST_PLUGIN_SYSTEM_PATH=$SNAP/usr/lib/gstreamer-1.0
           GST_PLUGIN_SCANNER=$SNAP/usr/libexec/gstreamer-1.0/gst-plugin-scanner
       $SNAP/usr/bin/corebird
-
     plugs:
       - gnome-3-24-platform
       - gsettings
@@ -43,116 +42,403 @@ apps:
       - x11
 
 parts:
+  prepare:
+    plugin: nil
+    prepare: |
+      echo "deb http://ppa.launchpad.net/ubuntu-desktop/gnome-3-24/ubuntu xenial main" | tee /etc/apt/sources.list.d/gnome-3-24.list
+      apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 399B698EEA9EF163B6F9A0F62CC98497A1231595
+      apt update
+      apt upgrade -yy
+
   libopenh264-helper:
     source: libopenh264-helper
     source-subdir: libopenh264
     plugin: make
+    stage-packages:
+      - bzip2
+      - curl
     after: [libopenh264-library]
+    prime:
+      - -bin/bz*
+      - -etc
+      - -usr/lib/gcc
+      - -usr/lib/sasl2
+      - -usr/share
 
   libopenh264-library:
     plugin: make
     source: https://github.com/cisco/openh264/archive/v1.7.0.tar.gz
     build-packages:
+      - g++
+      - libasound2-dev
+      - libpulse-dev
       - nasm
-    stage-packages:
-      - bzip2
-      - curl
+    stage-packages: [libpulse0]
     prime:
-      - '-bin/bz*'
+      - -etc
+      - -usr/local/include
+      - -usr/local/lib/pkgconfig
+
+  gstreamer:
+    plugin: autotools
+    source: http://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.10.4.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --disable-rpath
+      - --disable-gst-debug
+      - --disable-gst-tracer-hooks
+      - --disable-debug
+      - --disable-examples
+      - --disable-tests
+      - --disable-benchmarks
+      - --disable-tools
+      - --disable-check
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - liborc-0.4-dev
+      - libpulse-dev
+    stage-packages:
+      - liborc-0.4-0
+      - libpulse0
+    after: [libopenh264-library, prepare]
+    prime:
+      - -etc
+      - -usr/bin
+      - -usr/include
+      - -usr/lib/gcc
+      - -usr/lib/pkgconfig
+      - -usr/libexec/gstreamer-1.0/gst-ptp-helper
+      - -usr/share/aclocal
+      - -usr/share/bash-completion
+      - -usr/share/doc
+      - -usr/share/gtk-doc
+    build-attributes: [no-system-libraries]
+
+  gst-plugins-base:
+    plugin: autotools
+    source: http://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.10.4.tar.xz
+    configflags:
+      - --prefix=/usr
+    build-packages: [libasound2-dev, libcairo2-dev, libpulse-dev]
+    stage-packages: [libpulse0]
+    after: [gstreamer, prepare]
+    prime:
+      - -etc
+      - -usr/bin
+      - -usr/include
+      - -usr/lib/pkgconfig
+      - -usr/share/gst-plugins-base
+      - -usr/share/gtk-doc
+      - -usr/share/man
+    build-attributes: [no-system-libraries]
+
+  gst-plugins-libav:
+    plugin: autotools
+    source: http://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.10.4.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --enable-small
+      - --disable-programs
+      - --disable-doc
+      - --disable-w32threads
+      - --disable-os2threads
+      - --disable-encoders
+      - --disable-indevs
+      - --enable-gnutls
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - libgnutls28-dev
+      - liborc-0.4-dev
+      - libpulse-dev
+      - yasm
+    stage-packages:
+      - libgnutls30
+      - liborc-0.4-0
+      - libpulse0
+    after: [gstreamer, gst-plugins-base, libopenh264-library, prepare]
+    prime:
+      - -etc
+      - -usr/lib/gcc
+      - -usr/share/doc
+      - -usr/share/gtk-doc
+    build-attributes: [no-system-libraries]
+
+  gst-plugins-good:
+    plugin: autotools
+    source: http://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.10.4.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --disable-rpath
+      - --disable-debug
+      - --disable-examples
+      - --disable-alpha
+      - --disable-apetag
+      - --disable-audiofx
+      - --disable-cutter
+      - --disable-debugutils
+      - --disable-dtmf
+      - --disable-effectv
+      - --disable-equalizer
+      - --disable-flv
+      - --disable-flx
+      - --disable-goom
+      - --disable-goom2k1
+      - --disable-icydemux
+      - --disable-id3demux
+      - --disable-imagefreeze
+      - --disable-interleave
+      - --disable-law
+      - --disable-level
+      - --disable-monoscope
+      - --disable-replaygain
+      - --disable-rtp
+      - --disable-rtpmanager
+      - --disable-rtsp
+      - --disable-shapewipe
+      - --disable-smpte
+      - --disable-spectrum
+      - --disable-udp
+      - --disable-videobox
+      - --disable-wavenc
+      - --disable-wavparse
+      - --disable-y4m
+      - --disable-directsound
+      - --disable-waveform
+      - --disable-oss
+      - --disable-oss4
+      - --disable-sunaudio
+      - --disable-osx_audio
+      - --disable-osx_video
+      - --disable-aalib
+      - --disable-aalibtest
+      - --disable-flac
+      - --disable-jack
+      - --disable-jpeg
+      - --disable-libcaca
+      - --disable-libdv
+      - --disable-libpng
+      - --disable-dv1394
+      - --disable-shout2
+      - --disable-speex
+      - --disable-taglib
+      - --disable-vpx
+      - --disable-wavpack
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - liborc-0.4-dev
+      - libpulse-dev
+    stage-packages:
+      - liborc-0.4-0
+      - libpulse0
+    after: [gstreamer, gst-plugins-base, libopenh264-library, prepare]
+    prime:
+      - -etc
+      - -usr/lib/gcc
+      - -usr/share/doc
+      - -usr/share/gtk-doc
+    build-attributes: [no-system-libraries]
+
+  gst-plugins-bad:
+    plugin: autotools
+    source: http://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.10.4.tar.xz
+    configflags:
+      - --prefix=/usr
+      - --disable-rpath
+      - --disable-debug
+      - --disable-examples
+      - --disable-accurip
+      - --disable-adpcmdec
+      - --disable-adpcmenc
+      - --disable-aiff
+      - --disable-videoframe_audiolevel
+      - --disable-asfmux
+      - --disable-audiofxbad
+      - --disable-audiomixer
+      - --disable-compositor
+      - --disable-audiovisualizers
+      - --disable-autoconvert
+      - --disable-bayer
+      - --disable-camerabin2
+      - --disable-cdxaparse
+      - --disable-coloreffects
+      - --disable-dccp
+      - --disable-debugutils
+      - --disable-dvbsuboverlay
+      - --disable-dvdspu
+      - --disable-faceoverlay
+      - --disable-festival
+      - --disable-fieldanalysis
+      - --disable-freeverb
+      - --disable-frei0r
+      - --disable-gaudieffects
+      - --disable-geometrictransform
+      - --disable-gdp
+      - --disable-hdvparse
+      - --disable-id3tag
+      - --disable-inter
+      - --disable-interlace
+      - --disable-ivfparse
+      - --disable-ivtc
+      - --disable-jp2kdecimator
+      - --disable-jpegformat
+      - --disable-librfb
+      - --disable-midi
+      - --disable-mve
+      - --disable-mxf
+      - --disable-netsim
+      - --disable-nuvdemux
+      - --disable-onvif
+      - --disable-patchdetect
+      - --disable-pcapparse
+      - --disable-pnm
+      - --disable-removesilence
+      - --disable-sdi
+      - --disable-sdp
+      - --disable-siren
+      - --disable-speed
+      - --disable-subenc
+      - --disable-stereo
+      - --disable-timecode
+      - --disable-tta
+      - --disable-videofilters
+      - --disable-videomeasure
+      - --disable-videosignal
+      - --disable-vmnc
+      - --disable-y4m
+      - --disable-yadif
+      - --disable-directsound
+      - --disable-wasapi
+      - --disable-direct3d
+      - --disable-winscreencap
+      - --disable-winks
+      - --disable-android_media
+      - --disable-apple_media
+      - --disable-bluez
+      - --disable-shm
+      - --disable-vcd
+      - --disable-opensles
+      - --disable-uvch264
+      - --disable-nvenc
+      - --disable-tinyalsa
+      - --disable-assrender
+      - --disable-voamrwbenc
+      - --disable-voaacenc
+      - --disable-apexsink
+      - --disable-bs2b
+      - --disable-bz2
+      - --disable-chromaprint
+      - --disable-dash
+      - --disable-dc1394
+      - --disable-decklink
+      - --disable-directfb
+      - --disable-webp
+      - --disable-daala
+      - --disable-resindvd
+      - --disable-faac
+      - --disable-fbdev
+      - --disable-fdk_aac
+      - --disable-flite
+      - --disable-gsm
+      - --disable-fluidsynth
+      - --disable-kate
+      - --disable-kms
+      - --disable-ladspa
+      - --disable-lv2
+      - --disable-libmms
+      - --disable-srtp
+      - --disable-dtls
+      - --disable-linsys
+      - --disable-modplug
+      - --disable-mimic
+      - --disable-mpeg2enc
+      - --disable-mplex
+      - --disable-musepack
+      - --disable-nas
+      - --disable-neon
+      - --disable-ofa
+      - --disable-openal
+      - --disable-opencv
+      - --disable-openexr
+      - --disable-openjpeg
+      - --disable-openni2
+      - --disable-opus
+      - --disable-pvr
+      - --disable-rsvg
+      - --disable-qt
+      - --disable-libvisual
+      - --disable-timidity
+      - --disable-teletextdec
+      - --disable-wildmidi
+      - --disable-sndfile
+      - --disable-soundtouch
+      - --disable-spc
+      - --disable-gme
+      - --disable-dvb
+      - --disable-wininet
+      - --disable-acm
+      - --disable-sbc
+      - --disable-schro
+      - --disable-zbar
+      - --disable-spandsp
+      - --disable-sndio
+      - --disable-webrtcdsp
+    build-packages:
+      - bison
+      - flex
+      - libasound2-dev
+      - libgl1-mesa-dev
+      - liborc-0.4-dev
+      - libpulse-dev
+    stage-packages:
+      - liborc-0.4-0
+      - libpulse0
+    after: [gstreamer, gst-plugins-base, libopenh264-library, prepare]
+    prime:
+      - -usr/include
+      - -usr/lib/gcc
+      - -usr/lib/pkgconfig
+      - -usr/share/doc
+      - -usr/share/gtk-doc
+    build-attributes: [no-system-libraries]    
 
   corebird:
-    plugin: jhbuild
-    module-set: corebird.modules
-    module-set-dir: .
-    modules:
-      - corebird
-    cflags: '-Os'
+    plugin: autotools
+    source: https://github.com/baedert/corebird/releases/download/1.5.1/corebird-1.5.1.tar.xz
+    prepare: |
+      apt install -yy libgspell-1-dev
+    configflags:
+      - --prefix=/usr
+      - --disable-rpath
+      - --disable-spellcheck
     build-packages:
-      - desktop-file-utils
-      - doxygen
-      - intltool
-      - libcairo2-dev
-      - libcurl4-openssl-dev
-      - libdbus-1-dev
-      - libegl1-mesa-dev
-      - libenchant-dev
-      - libepoxy-dev
-      - libfaad-dev
-      - libffi-dev
-      - libfontconfig1-dev
-      - libgl1-mesa-dev
-      - libgnutls-dev
-      - libgudev-1.0-dev
-      - libmount-dev
-      - liborc-0.4-dev
-      - libproxy-dev
-      - libpulse-dev
+      # - libcurl3-openssl-dev
+      # - libgnutls-dev
+      - libjson-glib-dev
+      - librest-dev
+      - libsoup2.4-dev
       - libsqlite3-dev
-      - libtiff5-dev
-      - libunwind-dev
-      - libv4l-dev
-      - libwayland-dev
-      - libxcb-xkb-dev
-      - libxft-dev
-      - libxi-dev
-      - libxml2-dev
       - libxml2-utils
-      - libxslt1-dev
-      - libxtst-dev
-      - libxv-dev
-      - nasm
-      - pkg-config
-      - ragel
-      - tar
-      - wget
-      - xmlto
-      - xutils-dev
-      - xz-utils
-      - yasm
       - valac
-    stage-packages:
-      - libcurl3
-      - libgnutls30
-      - libpulse0
-    after: [desktop-gnome-platform, libopenh264-helper]
+    # stage-packages:
+      # - libgspell-1
+      # - libcurl3
+    after: 
+      - desktop-gnome-platform
+      - libopenh264-helper
+      - gstreamer
+      - gst-plugins-good
+      - gst-plugins-bad
+      - gst-plugins-libav
+      - prepare
     prime:
-      - bin/*-launch
-      - usr/bin/corebird
-      - usr/lib/gstreamer-1.0
-      - usr/lib/libgspell*
-      - usr/lib/libgst*
-      #- usr/lib/libjson-glib* # provided by platform
-      #- usr/lib/librest* # provided by platform
-      #- usr/lib/libsoup* # provided by platform
-      - usr/lib/*-linux-gnu/libasn*
-      - usr/lib/*-linux-gnu/libasyncns*
-      - usr/lib/*-linux-gnu/libboost*
-      - usr/lib/*-linux-gnu/libcapnp*
-      - usr/lib/*-linux-gnu/libcurl*
-      - usr/lib/*-linux-gnu/libdb*
-      - usr/lib/*-linux-gnu/libfaad*
-      - usr/lib/*-linux-gnu/libFLAC*
-      - usr/lib/*-linux-gnu/libheimbase*
-      - usr/lib/*-linux-gnu/libheimntlm*
-      - usr/lib/*-linux-gnu/libhx509*
-      - usr/lib/*-linux-gnu/libkj*
-      - usr/lib/*-linux-gnu/libber*
-      - usr/lib/*-linux-gnu/libldap*
-      - usr/lib/*-linux-gnu/libogg*
-      - usr/lib/*-linux-gnu/libprotobuf-lite*
-      - usr/lib/*-linux-gnu/libpulse*
-      - usr/lib/*-linux-gnu/libroken*
-      - usr/lib/*-linux-gnu/librtmp*
-      - usr/lib/*-linux-gnu/libsasl*
-      - usr/lib/*-linux-gnu/libsndfile*
-      - usr/lib/*-linux-gnu/libunwind*
-      - usr/lib/*-linux-gnu/libv4l*
-      - usr/lib/*-linux-gnu/libwind*
-      - usr/libexec/gstreamer-1.0/gst-plugin-scanner
-      - usr/local/lib/libopenh264*
-      - usr/share/appdata
-      - usr/share/dbus-1/services/org.baedert.corebird.service
-      - usr/share/glib-2.0/schemas/org.baedert.corebird.gschema.xml
-      - usr/share/icons/hicolor/**/corebird.png
-      - usr/share/locale/**/corebird.mo
-
+      - -usr/lib/gcc
+      - -usr/share/doc
+      - -usr/share/lintian
+      - -usr/share/man
+    build-attributes: [no-system-libraries]
