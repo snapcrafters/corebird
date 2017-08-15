@@ -8,6 +8,8 @@ description: |
   filtering of tweets and full text search. Corebird is able to manage multiple
   Twitter accounts.
 icon: assets/corebird.png
+
+grade: stable
 confinement: strict
 
 slots:
@@ -413,12 +415,12 @@ parts:
     prepare: |
       apt install -yy libgspell-1-dev
     configflags:
-      - --prefix=/usr
+      - --prefix=/snap/corebird/current/usr
       - --disable-rpath
-      - --disable-spellcheck
+      # - --disable-spellcheck
+    organize:
+      snap/corebird/current/usr: usr
     build-packages:
-      # - libcurl3-openssl-dev
-      # - libgnutls-dev
       - libjson-glib-dev
       - librest-dev
       - libsoup2.4-dev
