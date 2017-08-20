@@ -7,7 +7,7 @@ description: |
   features inline image and video preview, creation of lists and favorites,
   filtering of tweets and full text search. Corebird is able to manage multiple
   Twitter accounts.
-icon: assets/corebird.png
+icon: data/corebird.svg
 
 grade: stable
 confinement: strict
@@ -27,11 +27,7 @@ plugs:
 apps:
   corebird:
     command: |
-      libopenh264-launch desktop-launch
-      env GST_PLUGIN_PATH=$SNAP/usr/lib/gstreamer-1.0
-          GST_PLUGIN_SYSTEM_PATH=$SNAP/usr/lib/gstreamer-1.0
-          GST_PLUGIN_SCANNER=$SNAP/usr/libexec/gstreamer-1.0/gst-plugin-scanner
-      $SNAP/usr/bin/corebird
+      desktop-launch libopenh264-launch pulse-launch gstreamer-launch $SNAP/usr/bin/corebird
     plugs:
       - gnome-3-24-platform
       - gsettings
@@ -51,6 +47,16 @@ parts:
       apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 399B698EEA9EF163B6F9A0F62CC98497A1231595
       apt update
       apt upgrade -yy
+
+  gstreamer-launch:
+    plugin: dump
+    source: snap-files
+    prepare: |
+      chmod +x gstreamer-launch
+      chmod +x pulse-launch
+    organize:
+      gstreamer-launch: bin/gstreamer-launch
+      pulse-launch: bin/pulse-launch
 
   libopenh264-helper:
     source: libopenh264-helper
