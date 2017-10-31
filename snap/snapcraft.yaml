@@ -26,7 +26,7 @@ plugs:
 apps:
   corebird:
     command: |
-      desktop-launch pulse-launch libopenh264-launch gstreamer-launch fontconfig-launch snapcraft-preload $SNAP/usr/bin/corebird
+      desktop-launch pulse-launch libopenh264-launch gstreamer-launch fontconfig-launch $SNAP/usr/bin/corebird
     plugs:
       - desktop
       - gsettings
@@ -644,7 +644,6 @@ parts:
       - gstreamer
       # - gstreamer-vaapi
       - pango
-      - snapcraft-preload
     plugin: autotools
     source: https://github.com/baedert/corebird/releases/download/1.7.1/corebird-1.7.1.tar.xz
     # for some reason building from git is failing due to the gst heck in the configure script
