@@ -22,11 +22,25 @@ plugs:
     interface: content
     target: $SNAP/gnome-platform
     default-provider: gnome-3-26-1604:gnome-3-26-1604
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/share/themes
+    default-provider: gtk-common-themes:gtk-3-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/share/icons
+    default-provider: gtk-common-themes:icon-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/share/sounds
+    default-provider: gtk-common-themes:sounds-themes
 
 apps:
   corebird:
     command: |
       desktop-launch pulse-launch alsa-launch libopenh264-launch gstreamer-launch fontconfig-launch $SNAP/usr/bin/corebird
+    environment:
+      XDG_DATA_DIRS: $SNAP/share:$XDG_DATA_DIRS
     plugs:
     - desktop
     - desktop-legacy
@@ -614,6 +628,9 @@ parts:
       # build-packages and rely on it upgrading by the gnome-platform part's
       # apt upgrade step.
       snapcraftctl build
+      mkdir -p $SNAPCRAFT_PART_INSTALL/share/icons
+      mkdir -p $SNAPCRAFT_PART_INSTALL/share/sounds
+      mkdir -p $SNAPCRAFT_PART_INSTALL/share/themes
     configflags:
     - --prefix=/usr
     - --disable-rpath
@@ -627,6 +644,9 @@ parts:
     - valac
     prime:
     - usr/bin/corebird
+    - share/icons
+    - share/sounds
+    - share/themes
     - usr/share/applications/org.baedert.corebird.desktop
     - usr/share/dbus-1/services/org.baedert.corebird.service
     - usr/share/glib-2.0/schemas/org.baedert.corebird.gschema.xml
