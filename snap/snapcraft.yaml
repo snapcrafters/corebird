@@ -1,7 +1,7 @@
 name: corebird
+adopt-info: corebird
 version: "1.7.4"
 grade: stable
-summary: CoreBird Twitter Client
 description: |
   Corebird is a modern and lightweight Twitter client for the GNOME 3 desktop. It
   features inline image and video preview, creation of lists and favorites,
@@ -25,6 +25,7 @@ plugs:
 
 apps:
   corebird:
+    common-id: org.baedert.corebird
     command: |
       desktop-launch pulse-launch alsa-launch libopenh264-launch gstreamer-launch fontconfig-launch $SNAP/usr/bin/corebird
     plugs:
@@ -35,7 +36,6 @@ apps:
     - network
     - opengl
     - pulseaudio
-    - unity7
     - wayland
     - x11
 
@@ -608,6 +608,7 @@ parts:
     # - gstreamer-vaapi
     plugin: autotools
     source: https://github.com/baedert/corebird/releases/download/$SNAPCRAFT_PROJECT_VERSION/corebird-$SNAPCRAFT_PROJECT_VERSION.tar.xz
+    parse-info: [usr/share/metainfo/org.baedert.corebird.appdata.xml]
     override-build: |
       apt-get install -yqq libgspell-1-dev
       # this package doesn't exist in xenial so we can't add it to
