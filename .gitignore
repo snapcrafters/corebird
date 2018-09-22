@@ -1,6 +1,9 @@
+parts
+stage
+prime
+.snapcraft
+__pycache__
+*.pyc
 *.snap
 *.tar.gz
 *.tar.bz2
-parts
-prime
-stage
